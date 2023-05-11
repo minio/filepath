@@ -93,7 +93,7 @@ func walk(path string, info os.FileInfo, walkFn WalkFunc) error {
 		return err
 	}
 
-	if !info.IsDir() {
+	if !info.IsDir() && info.Mode()&os.ModeSymlink == 0 {
 		return nil
 	}
 
