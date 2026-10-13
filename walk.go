@@ -30,6 +30,17 @@ func Walk(root string, walkFn WalkFunc) error {
 	return walk(root, info, walkFn)
 }
 
+// flatKeySeparator is what a directory name is taken to end in while entries
+// are sorted.
+//
+// An object store sorts `a/b` under `a` because `/` is 0x2F, below every
+// character a sibling name can begin with. os.PathSeparator is that same byte
+// on Unix and 0x5C on Windows, which sits above the digits and the upper case
+// letters: sorting by it there puts a directory after siblings it should come
+// before, which is neither flat key order nor the order an object store lists
+// the same names in.
+const flatKeySeparator = "/"
+
 // byName implements sort.Interface for sorting os.FileInfo list.
 type byName []os.FileInfo
 
@@ -38,12 +49,12 @@ func (f byName) Swap(i, j int) { f[i], f[j] = f[j], f[i] }
 func (f byName) Less(i, j int) bool {
 	n1 := f[i].Name()
 	if f[i].IsDir() {
-		n1 = n1 + string(os.PathSeparator)
+		n1 = n1 + flatKeySeparator
 	}
 
 	n2 := f[j].Name()
 	if f[j].IsDir() {
-		n2 = n2 + string(os.PathSeparator)
+		n2 = n2 + flatKeySeparator
 	}
 
 	return n1 < n2

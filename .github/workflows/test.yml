@@ -1,0 +1,29 @@
+name: Test
+on:
+  pull_request:
+    branches:
+    - master
+    - main
+  push:
+    branches:
+    - master
+    - main
+jobs:
+  test:
+    name: Walk order on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        go-version: [ 1.27 ]
+    steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v7
+    - uses: actions/setup-go@v7
+      with:
+        go-version: ${{ matrix.go-version }}
+        check-latest: true
+    - name: Run tests
+      run: go test -v ./...
+      shell: bash
